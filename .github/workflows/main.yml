@@ -2,6 +2,17 @@ name: Build Termux Node.js Archives
 
 on:
   workflow_dispatch:
+    inputs:
+      version:
+        description: Node.js LTS version
+        required: true
+        type: string
+
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -14,16 +25,16 @@ jobs:
       matrix:
         include:
           - arch: aarch64
-            url: https://grimler.se/termux-main/pool/main/n/nodejs-lts/nodejs-lts_24.18.0_aarch64.deb
+            url: https://grimler.se/termux-main/pool/main/n/nodejs-lts/nodejs-lts_${{ inputs.version }}_aarch64.deb
 
           - arch: arm
-            url: https://grimler.se/termux-main/pool/main/n/nodejs-lts/nodejs-lts_24.18.0_arm.deb
+            url: https://grimler.se/termux-main/pool/main/n/nodejs-lts/nodejs-lts_${{ inputs.version }}_arm.deb
 
           - arch: i686
-            url: https://grimler.se/termux-main/pool/main/n/nodejs-lts/nodejs-lts_24.18.0_i686.deb
+            url: https://grimler.se/termux-main/pool/main/n/nodejs-lts/nodejs-lts_${{ inputs.version }}_i686.deb
 
           - arch: x86_64
-            url: https://grimler.se/termux-main/pool/main/n/nodejs-lts/nodejs-lts_24.18.0_x86_64.deb
+            url: https://grimler.se/termux-main/pool/main/n/nodejs-lts/nodejs-lts_${{ inputs.version }}_x86_64.deb
 
     steps:
       - uses: actions/checkout@v4
@@ -86,8 +97,8 @@ jobs:
         - name: Publish Release
           uses: softprops/action-gh-release@v2
           with:
-            tag_name: v24.18.0
-            name: Node.js LTS 24.18.0
+            tag_name: v${{ inputs.version }}
+            name: Node.js LTS ${{ inputs.version }}
             generate_release_notes: true
             files: |
               release-assets/**/nodejs-aarch64.tar.gz
