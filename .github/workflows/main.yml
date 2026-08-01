@@ -70,26 +70,27 @@ jobs:
         with:
           name: nodejs-${{ matrix.arch }}
           path: artifacts/nodejs-${{ matrix.arch }}.tar.gz
- release:
-  needs: build
-  runs-on: ubuntu-latest
+  
+  release:
+      needs: build
+      runs-on: ubuntu-latest
 
-  steps:
-    - uses: actions/download-artifact@v4
-      with:
-        path: release-assets
+      steps:
+        - uses: actions/download-artifact@v4
+          with:
+            path: release-assets
 
-    - name: Display files
-      run: find release-assets
+        - name: Display files
+          run: find release-assets
 
-    - name: Publish Release
-      uses: softprops/action-gh-release@v2
-      with:
-        tag_name: v24.18.0
-        name: Node.js LTS 24.18.0
-        generate_release_notes: true
-        files: |
-          release-assets/**/nodejs-aarch64.tar.gz
-          release-assets/**/nodejs-arm.tar.gz
-          release-assets/**/nodejs-i686.tar.gz
-          release-assets/**/nodejs-x86_64.tar.gz
+        - name: Publish Release
+          uses: softprops/action-gh-release@v2
+          with:
+            tag_name: v24.18.0
+            name: Node.js LTS 24.18.0
+            generate_release_notes: true
+            files: |
+              release-assets/**/nodejs-aarch64.tar.gz
+              release-assets/**/nodejs-arm.tar.gz
+              release-assets/**/nodejs-i686.tar.gz
+              release-assets/**/nodejs-x86_64.tar.gz
