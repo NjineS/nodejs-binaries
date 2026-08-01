@@ -1,0 +1,50 @@
+name: Extract Termux Node.js Packages
+
+on:
+  workflow_dispatch:
+
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        include:
+          - arch: aarch64
+            url: https://grimler.se/termux-main/pool/main/n/nodejs-lts/nodejs-lts_24.18.0_aarch64.deb
+
+          - arch: arm
+            url: https://grimler.se/termux-main/pool/main/n/nodejs-lts/nodejs-lts_24.18.0_arm.deb
+
+          - arch: i686
+            url: https://grimler.se/termux-main/pool/main/n/nodejs-lts/nodejs-lts_24.18.0_i686.deb
+
+          - arch: x86_64
+            url: https://grimler.se/termux-main/pool/main/n/nodejs-lts/nodejs-lts_24.18.0_x86_64.deb
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download package
+        run: |
+          mkdir -p packages
+          curl -L "${{ matrix.url }}" -o "packages/nodejs-lts_${{ matrix.arch }}.deb"
+
+      - name: Extract .deb archive
+        run: |
+          ARCH_DIR="output/${{ matrix.arch }}"
+          mkdir -p "$ARCH_DIR"
+
+          cd "$ARCH_DIR"
+
+          ar x ../../packages/nodejs-lts_${{ matrix.arch }}.deb
+
+          echo "Contents:"
+          ls -lah
+
+      - name: Upload extracted archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: nodejs-lts-${{ matrix.arch }}-deb
+          path: output/${{ matrix.arch }}
