@@ -1,10 +1,10 @@
-name: Extract Termux Node.js Packages
+name: Build Termux Node.js Archives
 
 on:
   workflow_dispatch:
 
 jobs:
-  extract:
+  build:
     runs-on: ubuntu-latest
 
     strategy:
@@ -23,28 +23,47 @@ jobs:
             url: https://grimler.se/termux-main/pool/main/n/nodejs-lts/nodejs-lts_24.18.0_x86_64.deb
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Download package
         run: |
-          mkdir -p packages
-          curl -L "${{ matrix.url }}" -o "packages/nodejs-lts_${{ matrix.arch }}.deb"
+          mkdir -p downloads
+          curl -L "${{ matrix.url }}" \
+            -o "downloads/nodejs-${{ matrix.arch }}.deb"
 
-      - name: Extract .deb archive
+      - name: Extract package
         run: |
-          ARCH_DIR="output/${{ matrix.arch }}"
-          mkdir -p "$ARCH_DIR"
+          mkdir -p work/${{ matrix.arch }}
 
-          cd "$ARCH_DIR"
+          cd work/${{ matrix.arch }}
 
-          ar x ../../packages/nodejs-lts_${{ matrix.arch }}.deb
+          # Extract the .deb
+          ar x ../../../downloads/nodejs-${{ matrix.arch }}.deb
 
-          echo "Contents:"
-          ls -lah
+          # Extract the filesystem
+          mkdir rootfs
+          tar -xf data.tar.* -C rootfs
 
-      - name: Upload extracted archive
+      - name: Flatten to files/
+        run: |
+          mkdir -p output/${{ matrix.arch }}
+
+          # Move contents of files/ to be the archive root
+          cp -a \
+            work/${{ matrix.arch }}/rootfs/data/data/com.termux/files/. \
+            output/${{ matrix.arch }}/
+
+      - name: Create archive
+        run: |
+          mkdir -p artifacts
+
+          tar \
+            -C output/${{ matrix.arch }} \
+            -czf artifacts/nodejs-${{ matrix.arch }}.tar.gz \
+            .
+
+      - name: Upload archive
         uses: actions/upload-artifact@v4
         with:
-          name: nodejs-lts-${{ matrix.arch }}-deb
-          path: output/${{ matrix.arch }}
+          name: nodejs-${{ matrix.arch }}
+          path: artifacts/nodejs-${{ matrix.arch }}.tar.gz
