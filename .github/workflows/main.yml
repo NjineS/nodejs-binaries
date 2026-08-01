@@ -38,7 +38,7 @@ jobs:
           cd work/${{ matrix.arch }}
 
           # Extract the .deb
-          ar x ../../../downloads/nodejs-${{ matrix.arch }}.deb
+          ar x ../../downloads/nodejs-${{ matrix.arch }}.deb
 
           # Extract the filesystem
           mkdir rootfs
